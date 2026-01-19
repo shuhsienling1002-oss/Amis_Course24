@@ -68,7 +68,7 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# --- 2. 資料庫 (Unit 24: 14個單字 - 句子提取核心詞) ---
+# --- 2. 資料庫 (Unit 24: 14個單字 - User Fix) ---
 vocab_data = [
     {"amis": "Romi'ad", "chi": "日子 / 天氣", "icon": "📅", "source": "Row 252"},
     {"amis": "Dafak", "chi": "清晨 / 早上", "icon": "🌅", "source": "Row 1758"},
@@ -79,8 +79,8 @@ vocab_data = [
     {"amis": "Matini", "chi": "現在 / 此刻", "icon": "⌚", "source": "Row 1583"},
     {"amis": "Lomowad", "chi": "起床", "icon": "🛌", "source": "Row 1583"},
     {"amis": "Lahok", "chi": "中午 / 午餐", "icon": "🍱", "source": "Row 240"},
-    {"amis": "Miheca", "chi": "年 / 歲", "icon": "🎂", "source": "Row 410"},
-    {"amis": "Mahemek", "chi": "勤勞 / 以...為榮", "icon": "💪", "source": "Row 410"},
+    {"amis": "Miheca", "chi": "年", "icon": "🎂", "source": "User Fix"}, # 修正
+    {"amis": "Mahemek", "chi": "高興 / 以...為榮", "icon": "😊", "source": "User Fix"}, # 修正
     {"amis": "Anini", "chi": "今天 / 現在", "icon": "👇", "source": "Row 1758"},
     {"amis": "Nacila", "chi": "昨天", "icon": "⏪", "source": "Row 1815"},
     {"amis": "Anocila", "chi": "明天", "icon": "⏩", "source": "Row 4610"},
@@ -93,7 +93,7 @@ sentences = [
     {"amis": "Lomowad ko wawa i matini.", "chi": "小孩現在起床。", "icon": "🛌", "source": "Row 1583"},
     {"amis": "Pina ko toki a maomah kami?", "chi": "我們幾點做農活(勞動)？", "icon": "🌾", "source": "Row 676"},
     {"amis": "Caay kalahok kako i tini.", "chi": "我沒有在這裡吃午餐。", "icon": "🍱", "source": "Row 240"},
-    {"amis": "Mahemek ko ina ni Panay to mihecaheca.", "chi": "Panay的媽媽每年都很勤勞。", "icon": "💪", "source": "Row 410"},
+    {"amis": "Mahemek ko ina ni Panay to mihecaheca.", "chi": "Panay的媽媽每年都很高興(以...為榮)。", "icon": "😊", "source": "Row 410 (Trans. Adjusted)"},
     {"amis": "Fangcal ko romi'ad.", "chi": "天氣(日子)好。", "icon": "☀️", "source": "Row 252"},
 ]
 
@@ -137,9 +137,9 @@ raw_quiz_pool = [
     {
         "q": "單字測驗：Mahemek",
         "audio": "Mahemek",
-        "options": ["勤勞/榮耀", "生氣", "懶惰"],
-        "ans": "勤勞/榮耀",
-        "hint": "Row 410: ...to mihecaheca (每年都很...)"
+        "options": ["高興/以...為榮", "生氣", "悲傷"],
+        "ans": "高興/以...為榮",
+        "hint": "Row 410: Mahemek ko ina... (媽媽很高興/引以為榮)"
     },
     {
         "q": "單字測驗：Toki",
@@ -151,9 +151,9 @@ raw_quiz_pool = [
     {
         "q": "單字測驗：Miheca",
         "audio": "Miheca",
-        "options": ["年/歲", "月", "日"],
-        "ans": "年/歲",
-        "hint": "計算時間的單位 (Row 410)"
+        "options": ["年", "月", "日"],
+        "ans": "年",
+        "hint": "Row 410: ...to mihecaheca (每一年)"
     }
 ]
 
@@ -177,7 +177,7 @@ if 'init' not in st.session_state:
 
 # --- 5. 主介面 ---
 st.markdown("<h1 style='text-align: center; color: #1565C0;'>Unit 24: O Romi'ad</h1>", unsafe_allow_html=True)
-st.markdown("<p style='text-align: center; color: #666;'>時間與日子 (CSV Extracted)</p>", unsafe_allow_html=True)
+st.markdown("<p style='text-align: center; color: #666;'>時間與日子 (User Corrected)</p>", unsafe_allow_html=True)
 
 tab1, tab2 = st.tabs(["📚 詞彙與句型", "🎲 隨機挑戰"])
 
