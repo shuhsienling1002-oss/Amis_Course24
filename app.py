@@ -11,45 +11,46 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# --- 🎨 1. CSS 美化 (主題：阿美族服飾紅/熱情紅) ---
+# --- 🎨 1. CSS 美化 (主題：阿美族服飾紅) ---
 st.markdown("""
     <style>
     body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; }
     
-    /* 主色調：阿美紅 (#C62828) 與 織布白 */
+    /* 主色調：阿美紅 (#C62828) */
     h1 { color: #C62828; text-align: center; margin-bottom: 0px; }
     .subtitle { text-align: center; color: #5D4037; margin-top: 5px; font-size: 18px; }
     .author-tag { text-align: center; color: #8D6E63; font-weight: bold; margin-bottom: 30px; font-size: 16px; }
     
-    /* 單字卡 (暖色系漸層) */
+    /* 單字卡 */
     .word-card {
         background: linear-gradient(135deg, #FFEBEE 0%, #ffffff 100%);
         padding: 20px;
         border-radius: 15px;
         box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         text-align: center;
-        margin-bottom: 15px;
-        border-bottom: 4px solid #C62828; /* 紅色底線 */
-        transition: transform 0.2s;
+        margin-bottom: 10px; /* 縮小間距以配合播放器 */
+        border-bottom: 4px solid #C62828;
     }
-    .word-card:hover { transform: translateY(-5px); }
     .emoji-icon { font-size: 48px; margin-bottom: 10px; }
     .amis-text { font-size: 24px; font-weight: bold; color: #B71C1C; margin-bottom: 5px; }
     .chinese-text { font-size: 16px; color: #5D4037; }
     .source-tag { font-size: 12px; color: #A1887F; text-align: right; font-style: italic; margin-top: 10px;}
     
-    /* 句子框 (米色背景) */
+    /* 句子框 */
     .sentence-box {
         background-color: #FFF3E0;
         border-left: 5px solid #FF9800;
         padding: 15px;
-        margin: 10px 0;
+        margin: 10px 0 5px 0; /* 底部留空給播放器 */
         border-radius: 0 10px 10px 0;
     }
     .sent-amis { font-size: 20px; color: #E65100; font-weight: bold; }
     .sent-chi { font-size: 16px; color: #4E342E; margin-top: 5px; }
 
-    /* 按鈕樣式 (暖色風格) */
+    /* 調整 streamlit 原生 audio 播放器樣式 (盡量簡潔) */
+    .stAudio { margin-top: -5px; margin-bottom: 15px; }
+    
+    /* 測驗區按鈕 */
     .stButton>button {
         width: 100%; 
         border-radius: 12px; 
@@ -71,7 +72,7 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# --- 📂 2. Data Layer (數據層 - Riko' 系列) ---
+# --- 📂 2. Data Layer (數據層) ---
 VOCAB_DATA = [
     {"amis": "Riko'", "chi": "衣服", "icon": "👕", "source": "核心單字", "audio": "riko.m4a"},
     {"amis": "Makapahay", "chi": "漂亮的", "icon": "✨", "source": "形容詞", "audio": "makapahay.m4a"},
@@ -102,38 +103,36 @@ def safe_rerun():
             st.stop()
 
 class ResourceManager:
-    """資源管理器：智慧路徑搜尋"""
+    """資源管理器：智慧路徑搜尋與直接渲染"""
     
     @staticmethod
     def find_audio_path(filename: str):
-        """在多個可能的位置尋找檔案"""
         candidates = [
-            f"Teacher_Course23/audio/{filename}",  # 主要路徑
-            f"audio/{filename}",                   # 備用路徑
-            filename                               # 根目錄
+            f"Teacher_Course23/audio/{filename}",
+            f"audio/{filename}",
+            filename
         ]
-        
         for path in candidates:
             if os.path.exists(path):
                 return path
         return None
 
     @staticmethod
-    def play_audio(filename: str):
+    def render_audio_player(filename: str):
+        """直接渲染 st.audio 播放器，不需按鈕觸發"""
         found_path = ResourceManager.find_audio_path(filename)
         
         if found_path:
             try:
                 with open(found_path, "rb") as f:
                     audio_bytes = f.read()
+                # 直接顯示播放器
                 st.audio(audio_bytes, format='audio/mp4')
             except Exception as e:
-                st.error(f"播放錯誤: {e}")
+                st.error(f"Error: {e}")
         else:
-            st.warning(f"⚠️ 找不到檔案: {filename}")
-            with st.expander("🔧 為什麼沒聲音？"):
-                st.write(f"系統找不到: {filename}")
-                st.write("請確認檔案是否上傳至 Teacher_Course23/audio/")
+            # 找不到檔案時顯示一個小的警告，方便除錯
+            st.caption(f"⚠️ 待上傳: {filename}")
 
 class QuizEngine:
     @staticmethod
@@ -163,12 +162,10 @@ class QuizEngine:
 # --- 📱 4. Presentation Layer (UI 介面) ---
 
 def main():
-    # 標題區 (阿美族服飾主題)
     st.markdown("<h1 style='text-align: center;'>👕 Riko' 阿美語服飾篇</h1>", unsafe_allow_html=True)
     st.markdown("<div class='subtitle'>阿美語生活教室 | 主題：衣著與形容詞</div>", unsafe_allow_html=True)
     st.markdown("<div class='author-tag'>講師：高春美 | 教材提供者：高春美</div>", unsafe_allow_html=True)
 
-    # 初始化 Session State
     if 'init' not in st.session_state:
         st.session_state.score = 0
         st.session_state.current_q_idx = 0
@@ -177,12 +174,13 @@ def main():
 
     tab1, tab2 = st.tabs(["📖 學習單字與句型", "🎲 隨機挑戰"])
 
-    # === Tab 1: 學習模式 ===
+    # === Tab 1: 學習模式 (直接播放版) ===
     with tab1:
         st.subheader("📝 核心單字 (Vocabulary)")
         col1, col2 = st.columns(2)
         for i, word in enumerate(VOCAB_DATA):
             with (col1 if i % 2 == 0 else col2):
+                # 1. 顯示卡片
                 st.markdown(f"""
                 <div class="word-card">
                     <div class="emoji-icon">{word['icon']}</div>
@@ -191,20 +189,23 @@ def main():
                     <div class="source-tag">{word['source']}</div>
                 </div>
                 """, unsafe_allow_html=True)
-                if st.button(f"🔊 播放", key=f"btn_vocab_{i}"):
-                    ResourceManager.play_audio(word['audio'])
+                
+                # 2. 直接顯示播放器 (無按鈕)
+                ResourceManager.render_audio_player(word['audio'])
 
         st.markdown("---")
         st.subheader("🗣️ 實用句型 (Sentences)")
         for i, sent in enumerate(SENTENCE_DATA):
+            # 1. 顯示句子框
             st.markdown(f"""
             <div class="sentence-box">
                 <div class="sent-amis">{sent['icon']} {sent['amis']}</div>
                 <div class="sent-chi">{sent['chi']}</div>
             </div>
             """, unsafe_allow_html=True)
-            if st.button(f"▶️ 朗讀句子", key=f"btn_sent_{i}"):
-                ResourceManager.play_audio(sent['audio'])
+            
+            # 2. 直接顯示播放器 (無按鈕)
+            ResourceManager.render_audio_player(sent['audio'])
 
     # === Tab 2: 測驗模式 ===
     with tab2:
@@ -220,8 +221,9 @@ def main():
             
             st.markdown(f"### Q{current_idx + 1}: {q_data['q']}")
             
-            if st.button("🔊 聽聽看", key=f"quiz_audio_{current_idx}"):
-                ResourceManager.play_audio(q_data['audio'])
+            # 測驗區也改為直接顯示播放器，方便聽力測試
+            st.caption("請聽音檔：")
+            ResourceManager.render_audio_player(q_data['audio'])
             
             cols = st.columns(len(q_data['options']))
             if f"answered_{current_idx}" not in st.session_state:
@@ -267,7 +269,8 @@ def main():
                 if os.path.exists("Teacher_Course23/audio"):
                     audio_files = os.listdir("Teacher_Course23/audio")
                     st.write(f"📂 audio 內有 {len(audio_files)} 個檔案")
-                    st.code("\n".join(audio_files[:5]))
+                else:
+                    st.error("❌ audio 資料夾是空的或不存在")
             else:
                 st.warning("⚠️ 沒找到 Teacher_Course23")
         except Exception as e:
